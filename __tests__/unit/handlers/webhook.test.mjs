@@ -1,6 +1,7 @@
 import { handler as webhook } from '../../../src/handlers/webhook.mjs'
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { mockClient } from 'aws-sdk-client-mock'
+import 'aws-sdk-client-mock-jest'
 
 describe('Webhook function', () => {
   const ddbMock = mockClient(DynamoDBDocumentClient)
@@ -20,9 +21,11 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
+    ddbMock.on(PutCommand).resolves({})
     const response = await webhook(event, context)
 
     expect(response.statusCode).toBe(200)
+    expect(ddbMock).toHaveReceivedCommand(PutCommand)
   })
 
   test('returns a 400 status code for a request missing the CampaignName parameter', async () => {

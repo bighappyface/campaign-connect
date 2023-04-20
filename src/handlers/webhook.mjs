@@ -1,22 +1,28 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { v1 as uuid } from 'uuid'
+
 const client = new DynamoDBClient({})
 const dynamodb = DynamoDBDocumentClient.from(client)
 
 const tableName = process.env.CAMPAIGN_ACTIVITY_TABLE
+
+const buildResponse = (statusCode, message) => {
+  return {
+    statusCode: statusCode,
+    body: JSON.stringify({ message: message }),
+  }
+}
 
 export const handler = async (event) => {
   const { queryStringParameters: queryParams } = event
   const { CampaignName, AccountId, ContactId, LeadId, UserToken } = queryParams
 
   if (!CampaignName || !UserToken) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: 'CampaignName and UserToken are required query parameters.',
-      }),
-    }
+    return buildResponse(
+      400,
+      'CampaignName and UserToken are required query parameters.',
+    )
   }
 
   if (
@@ -25,12 +31,7 @@ export const handler = async (event) => {
     (ContactId && !/^[a-zA-Z0-9]{15,18}$/.test(ContactId)) ||
     (LeadId && !/^[a-zA-Z0-9]{15,18}$/.test(LeadId))
   ) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        message: 'Invalid AccountId, ContactId, or LeadId.',
-      }),
-    }
+    return buildResponse(400, 'Invalid AccountId, ContactId, or LeadId.')
   }
 
   const params = {
@@ -46,15 +47,9 @@ export const handler = async (event) => {
   }
 
   try {
-    const data = await dynamodb.send(new GetCommand(params))
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Activity added successfully.' }),
-    }
+    await dynamodb.send(new PutCommand(params))
+    return buildResponse(200, 'Activity added successfully.')
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: error.message }),
-    }
+    return buildResponse(500, error.message)
   }
 }
