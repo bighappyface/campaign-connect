@@ -1,0 +1,11 @@
+{
+  "httpMethod": "GET",
+  "path": "/",
+  "queryStringParameters": {
+    "CampaignName": "Test Campaign",
+    "UserToken": "abc123",
+    "AccountId": "0011t00000abcxyz",
+    "ContactId": "0031t00000abcxyz",
+    "LeadId": "00Q1t00000abcxyz"
+  }
+}

@@ -1,0 +1,81 @@
+# This is the SAM template that represents the architecture of your serverless application
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-template-basics.html
+
+# The AWSTemplateFormatVersion identifies the capabilities of the template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/format-version-structure.html
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  campaign-connect
+
+# Transform section specifies one or more macros that AWS CloudFormation uses to process your template
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/transform-section-structure.html
+Transform:
+- AWS::Serverless-2016-10-31
+
+# Resources declares the AWS resources that you want to include in the stack
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  # Each Lambda function is defined by properties:
+  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+
+  webhookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/webhook.handler
+      Runtime: nodejs18.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Push campaign activity into dynamo db
+      Policies:
+        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CampaignActivityTable
+      Environment:
+        Variables:
+          # Make table name accessible as environment variable from function code during execution
+          CAMPAIGN_ACTIVITY_TABLE: !Ref CampaignActivityTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /webhook
+            Method: GET
+  
+  CampaignActivityTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: CampaignName
+          AttributeType: S
+        - AttributeName: UserToken
+          AttributeType: S
+        - AttributeName: AccountId
+          AttributeType: S
+        - AttributeName: ContactId
+          AttributeType: S
+        - AttributeName: LeadId
+          AttributeType: S
+        - AttributeName: TimeStamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: CampaignName
+          KeyType: HASH
+        - AttributeName: UserToken
+          KeyType: RANGE
+        - AttributeName: AccountId
+          KeyType: RANGE
+        - AttributeName: ContactId
+          KeyType: RANGE
+        - AttributeName: LeadId
+          KeyType: RANGE
+        - AttributeName: TimeStamp
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      TableName: CampaignActivity
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
