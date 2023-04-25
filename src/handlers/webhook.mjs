@@ -41,10 +41,12 @@ export const webhookHandler = async (event) => {
     )
   }
 
+  const idPattern = /^[a-zA-Z0-9]{15,18}$/;
+
   if (
-    (AccountId && !/^[a-zA-Z0-9]{15,18}$/.test(AccountId)) ||
-    (ContactId && !/^[a-zA-Z0-9]{15,18}$/.test(ContactId)) ||
-    (LeadId && !/^[a-zA-Z0-9]{15,18}$/.test(LeadId))
+    (AccountId && !idPattern.test(AccountId)) ||
+    (ContactId && !idPattern.test(ContactId)) ||
+    (LeadId && !idPattern.test(LeadId))
   ) {
     return buildResponse(400, 'Invalid AccountId, ContactId, or LeadId.')
   }
