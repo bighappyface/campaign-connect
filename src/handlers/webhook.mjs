@@ -1,11 +1,27 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { DynamoDBClient, ListTablesCommand } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
-import { v1 as uuid } from 'uuid'
 
-const client = new DynamoDBClient({})
-const dynamodb = DynamoDBDocumentClient.from(client)
+const clientConfig = {}
 
-const tableName = process.env.CAMPAIGN_ACTIVITY_TABLE
+const docClientConfig = {
+  marshallOptions: {
+    removeUndefinedValues: true,
+  }
+}
+
+if (process.env.AWS_SAM_LOCAL == "true") {
+  clientConfig.region = process.env.AWS_REGION
+  clientConfig.endpoint = 'http://dynamodb-local:8000',
+  clientConfig.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+}
+
+const client = new DynamoDBClient(clientConfig)
+const dynamodb = DynamoDBDocumentClient.from(client, docClientConfig)
+
+const tableName = process.env.TABLE_NAME
 
 const buildResponse = (statusCode, message) => {
   return {
@@ -14,7 +30,17 @@ const buildResponse = (statusCode, message) => {
   }
 }
 
-export const handler = async (event) => {
+export const webhookHandler = async (event) => {
+
+  
+    try {
+      const data = await dynamodb.send(new ListTablesCommand({}));
+      return buildResponse(200, [process.env, data])
+    } catch (error) {
+      return buildResponse(500, error)
+    }
+
+
   const { queryStringParameters: queryParams } = event
   const { CampaignName, AccountId, ContactId, LeadId, UserToken } = queryParams
 
@@ -37,7 +63,6 @@ export const handler = async (event) => {
   const params = {
     TableName: tableName,
     Item: {
-      id: uuid(),
       CampaignName,
       AccountId,
       ContactId,

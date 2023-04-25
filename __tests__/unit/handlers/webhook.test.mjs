@@ -1,4 +1,4 @@
-import { handler as webhook } from '../../../src/handlers/webhook.mjs'
+import { webhookHandler } from '../../../src/handlers/webhook.mjs'
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb'
 import { mockClient } from 'aws-sdk-client-mock'
 import 'aws-sdk-client-mock-jest'
@@ -22,7 +22,7 @@ describe('Webhook function', () => {
     }
     const context = {}
     ddbMock.on(PutCommand).resolves({})
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(200)
     expect(ddbMock).toHaveReceivedCommand(PutCommand)
@@ -38,7 +38,7 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(400)
   })
@@ -53,7 +53,7 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(400)
   })
@@ -69,7 +69,7 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(400)
   })
@@ -85,7 +85,7 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(400)
   })
@@ -101,7 +101,7 @@ describe('Webhook function', () => {
       },
     }
     const context = {}
-    const response = await webhook(event, context)
+    const response = await webhookHandler(event, context)
 
     expect(response.statusCode).toBe(400)
   })

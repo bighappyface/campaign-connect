@@ -1,0 +1,28 @@
+{
+  "TableName": "CampaignActivity",
+  "BillingMode": "PAY_PER_REQUEST",
+  "KeySchema": [
+    {
+      "AttributeName": "CampaignName",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "UserToken",
+      "KeyType": "RANGE"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "CampaignName",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "UserToken",
+      "AttributeType": "S"
+    }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 1,
+    "WriteCapacityUnits": 1
+  }
+}

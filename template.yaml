@@ -18,10 +18,10 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  webhookFunction:
+  webhookHandler:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/webhook.handler
+      Handler: src/handlers/webhook.webhookHandler
       Runtime: nodejs18.x
       Architectures:
         - x86_64
@@ -31,19 +31,19 @@ Resources:
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref CampaignActivityTable
-      Environment:
-        Variables:
-          # Make table name accessible as environment variable from function code during execution
-          CAMPAIGN_ACTIVITY_TABLE: !Ref CampaignActivityTable
+            TableName: !Ref CampaignActivity
       Events:
         Api:
           Type: Api
           Properties:
             Path: /webhook
             Method: GET
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref CampaignActivity
+
   
-  CampaignActivityTable:
+  CampaignActivity:
     Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
@@ -51,26 +51,10 @@ Resources:
           AttributeType: S
         - AttributeName: UserToken
           AttributeType: S
-        - AttributeName: AccountId
-          AttributeType: S
-        - AttributeName: ContactId
-          AttributeType: S
-        - AttributeName: LeadId
-          AttributeType: S
-        - AttributeName: TimeStamp
-          AttributeType: N
       KeySchema:
         - AttributeName: CampaignName
           KeyType: HASH
         - AttributeName: UserToken
-          KeyType: RANGE
-        - AttributeName: AccountId
-          KeyType: RANGE
-        - AttributeName: ContactId
-          KeyType: RANGE
-        - AttributeName: LeadId
-          KeyType: RANGE
-        - AttributeName: TimeStamp
           KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
       TableName: CampaignActivity
