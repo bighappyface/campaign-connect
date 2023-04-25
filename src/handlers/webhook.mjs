@@ -35,15 +35,14 @@ export const webhookHandler = async (event) => {
   const { queryStringParameters: queryParams } = event
   const { CampaignName, AccountId, ContactId, LeadId, UserToken } = queryParams
 
-  if (!CampaignName || !UserToken) {
+  if (!CampaignName || (!AccountId && !ContactId && !LeadId && !UserToken)) {
     return buildResponse(
       400,
-      'CampaignName and UserToken are required query parameters.',
+      'CampaignName and at least one of the IDs or UserToken are required query parameters.',
     )
   }
 
   if (
-    (!AccountId && !ContactId && !LeadId) ||
     (AccountId && !/^[a-zA-Z0-9]{15,18}$/.test(AccountId)) ||
     (ContactId && !/^[a-zA-Z0-9]{15,18}$/.test(ContactId)) ||
     (LeadId && !/^[a-zA-Z0-9]{15,18}$/.test(LeadId))
@@ -69,3 +68,4 @@ export const webhookHandler = async (event) => {
     return buildResponse(500, error.message)
   }
 }
+
