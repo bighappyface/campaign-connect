@@ -159,15 +159,34 @@ For an introduction to the AWS SAM specification, the AWS SAM CLI, and serverles
 
 Next, you can use the AWS Serverless Application Repository to deploy ready-to-use apps that go beyond Hello World samples and learn how authors developed their applications. For more information, see the [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/) and the [AWS Serverless Application Repository Developer Guide](https://docs.aws.amazon.com/serverlessrepo/latest/devguide/what-is-serverlessrepo.html).
 
-
-
+## Helpful commands
 
 ```bash
+## Setup AWS env vars
+source .env
 
-sam local invoke webhookHandler --event events/event-webhook.json 
+## Setup local AWS CLI
+aws configure
+
+## Setup and start dynamodb
+sh ./start-local-ddb.sh
+
+## Invoke the lamda locally one time
+sam local invoke webhookHandler --event events/event-webhook.json
+
+# Build and run local
+sam build && sam local start-api --docker-network sam-local --env-vars env.json
 
 # Handle DynamoDB
 aws dynamodb list-tables --endpoint-url http://localhost:8000
 aws dynamodb create-table --cli-input-json file://json/create-campaign-activity-table.json --endpoint-url http://localhost:8000
 aws dynamodb delete-table --table-name CampaignActivity --endpoint-url http://localhost:8000
+
+# Testing
+curl "http://127.0.0.1:3000/webhook?CampaignName=ABCDEFG&UserToken=54d3608f0f3b6e7e519a75d822a00976&AccountId=0019000000DmehKAAR"
 ```
+
+## dynamodb-admin
+See https://github.com/aaronshaf/dynamodb-admin
+
+Uses settings from .env

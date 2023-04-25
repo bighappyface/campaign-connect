@@ -6,15 +6,15 @@ const clientConfig = {}
 const docClientConfig = {
   marshallOptions: {
     removeUndefinedValues: true,
-  }
+  },
 }
 
-if (process.env.AWS_SAM_LOCAL == "true") {
+if (process.env.AWS_SAM_LOCAL == 'true') {
   clientConfig.region = process.env.AWS_REGION
-  clientConfig.endpoint = 'http://dynamodb-local:8000',
+  clientConfig.endpoint = process.env.DYNAMO_ENDPOINT
   clientConfig.credentials = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   }
 }
 
@@ -31,7 +31,6 @@ const buildResponse = (statusCode, message) => {
 }
 
 export const webhookHandler = async (event) => {
-
   const { queryStringParameters: queryParams } = event
   const { CampaignName, AccountId, ContactId, LeadId, UserToken } = queryParams
 
@@ -68,4 +67,3 @@ export const webhookHandler = async (event) => {
     return buildResponse(500, error.message)
   }
 }
-
