@@ -32,15 +32,6 @@ const buildResponse = (statusCode, message) => {
 
 export const webhookHandler = async (event) => {
 
-  
-    try {
-      const data = await dynamodb.send(new ListTablesCommand({}));
-      return buildResponse(200, [process.env, data])
-    } catch (error) {
-      return buildResponse(500, error)
-    }
-
-
   const { queryStringParameters: queryParams } = event
   const { CampaignName, AccountId, ContactId, LeadId, UserToken } = queryParams
 
